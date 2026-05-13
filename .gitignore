@@ -1,0 +1,48 @@
+# =========================
+# ZMIENNE ŚRODOWISKOWE I SEKRETY
+# =========================
+.env
+.env.local
+.env.*.local
+
+# =========================
+# PYTHON / BACKEND
+# =========================
+# Środowiska wirtualne
+venv/
+env/
+.venv/
+
+# Pliki tymczasowe i cache Pythona
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+
+# =========================
+# JAVASCRIPT / FRONTEND (React)
+# =========================
+# Pakiety Node.js (ten folder potrafi ważyć setki megabajtów)
+node_modules/
+/frontend/node_modules/
+
+# Foldery z wersją produkcyjną aplikacji
+dist/
+build/
+.next/
+
+# =========================
+# PLIKI SYSTEMOWE I EDYTORY (IDE)
+# =========================
+# Mac OS
+.DS_Store
+
+# Windows
+Thumbs.db
+
+# VS Code
+.vscode/
+
+# PyCharm / WebStorm / IntelliJ
+.idea/
+*.swp
