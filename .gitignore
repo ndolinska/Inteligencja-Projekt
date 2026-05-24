@@ -46,3 +46,4 @@ Thumbs.db
 # PyCharm / WebStorm / IntelliJ
 .idea/
 *.swp
+*.lnk
