@@ -43,7 +43,7 @@ if __name__ == "__main__":
     # Importujemy funkcję z naszego poprzedniego pliku!
     from youtube_fetcher import fetch_comments
     
-    TEST_VIDEO_ID = "dQw4w9WgXcQ" # Rickroll (komentarze po angielsku)
+    TEST_VIDEO_ID = "dQw4w9WgXcQ" # Rickroll 
     print("Pobieranie komentarzy...")
     df = fetch_comments(TEST_VIDEO_ID, max_results=20)
     
@@ -53,7 +53,7 @@ if __name__ == "__main__":
         
         # Wyświetlamy tekst, przypisaną emocję i dokładny wynik liczbowy
         print("\nWyniki analizy:")
-        print(df_results[['text', 'sentiment', 'sentiment_score']].head(10))
+        print(df_results[['text', 'sentiment', 'sentiment_score']].head(20))
         
         # Małe podsumowanie dla Twojego przyszłego dashboardu
         print("\nPodsumowanie emocji:")

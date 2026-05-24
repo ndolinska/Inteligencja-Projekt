@@ -6,11 +6,10 @@ from dotenv import load_dotenv
 # Ładujemy klucz z pliku .env
 load_dotenv()
 API_KEY = os.getenv('key')
-print(f"Mój wczytany klucz to: {API_KEY}")
 # Inicjalizacja klienta YouTube API
 youtube = build('youtube', 'v3', developerKey=API_KEY)
 
-def fetch_comments(video_id, max_results=100):
+def fetch_comments(video_id, max_results=20):
     """
     Pobiera najpopularniejsze komentarze dla zadanego ID filmu na YouTube.
     Zwraca je w postaci tabeli Pandas DataFrame.
@@ -57,6 +56,6 @@ if __name__ == "__main__":
     if not df_comments.empty:
         print(f"\nPomyślnie pobrano {len(df_comments)} komentarzy!\n")
         # Wyświetlamy 5 pierwszych wierszy (tylko kolumny tekst i polubienia, dla czytelności)
-        print(df_comments[['text', 'likes']].head(n=10))
+        print(df_comments[['text', 'likes']].head(n=20))
     else:
         print("Nie udało się pobrać żadnych komentarzy.")
