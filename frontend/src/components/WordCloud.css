@@ -1,0 +1,23 @@
+.word-cloud-card {
+  grid-column: 1 / -1;
+}
+
+.word-cloud {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 0.75rem;
+  align-items: center;
+  padding: 0.5rem 0;
+  min-height: 140px;
+}
+
+.word-tag {
+  cursor: default;
+  font-weight: 600;
+  line-height: 1.2;
+  padding: 0.15em 0.4em;
+  border-radius: 6px;
+  transition: color 0.15s, opacity 0.15s, background 0.15s;
+  user-select: none;
+  letter-spacing: -0.01em;
+}

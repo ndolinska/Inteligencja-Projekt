@@ -1,0 +1,38 @@
+# Instalacja:
+#   pip install -r requirements.txt
+#
+# Uwaga: projekt wymaga Python 3.10+
+# Testowano na Python 3.11 / Windows 11
+
+# --- YouTube Data API ---
+google-api-python-client>=2.100.0   # klient YouTube Data API v3
+python-dotenv>=1.0.0                # ładowanie klucza API z pliku .env
+
+# --- Dane i przetwarzanie ---
+pandas>=2.0.0
+numpy>=1.24.0
+
+# --- Preprocessing tekstu ---
+emoji>=2.8.0                        # zamiana emoji na tekst (🔥 → fire)
+langdetect>=1.0.9                   # wykrywanie języka komentarzy
+
+# --- NLP / Analiza sentymentu ---
+nltk>=3.8.1                         # VADER — słownikowy klasyfikator sentymentu
+
+# --- Klasyfikatory ML ---
+scikit-learn>=1.4.0                 # TF-IDF, Naive Bayes, Logistic Regression
+
+# --- Modele Transformer (HuggingFace) ---
+transformers>=4.40.0                # pipeline, AutoTokenizer, AutoModel
+torch>=2.1.0                        # backend PyTorch (CPU; dla GPU: torch+cu121)
+sentencepiece>=0.1.99               # tokenizer XLM-RoBERTa
+datasets>=2.18.0                    # tweet_eval dataset do ewaluacji modeli
+
+# --- Backend API ---
+fastapi>=0.110.0                    # framework REST API
+uvicorn[standard]>=0.27.0           # serwer ASGI do uruchamiania FastAPI
+
+# --- Topic Modeling (do dodania) ---
+# bertopic>=0.16.0                  # BERTopic — odkomentuj gdy topic_modeling.py gotowy
+# umap-learn>=0.5.5                 # redukcja wymiarowości dla BERTopic
+# hdbscan>=0.8.33                   # klasteryzacja dla BERTopic
