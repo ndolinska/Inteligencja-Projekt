@@ -1,0 +1,3 @@
+model,accuracy,f1_macro,f1_weighted
+TF-IDF + Naive Bayes,0.5798,0.5588,0.5716
+TF-IDF + Logistic Regression,0.5859,0.5706,0.5823
