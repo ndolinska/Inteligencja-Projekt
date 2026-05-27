@@ -93,10 +93,7 @@ def _emotion_to_group(emotion: str) -> str:
             return group
     return 'Neutralne'
 
-
-# ---------------------------------------------------------------------------
 # VADER — analiza sentymentu
-# ---------------------------------------------------------------------------
 
 def analyze_sentiment_vader(text: str) -> dict:
     """
@@ -137,10 +134,7 @@ def analyze_dataframe(df: pd.DataFrame,
     df_out['sentiment_score'] = results.apply(lambda r: r['score'])
     return df_out
 
-
-# ---------------------------------------------------------------------------
 # GoEmotions — głęboka analiza 28 kategorii emocji
-# ---------------------------------------------------------------------------
 
 def _load_emotion_model():
     """Ładuje model GoEmotions przy pierwszym użyciu (lazy loading)."""
@@ -241,9 +235,7 @@ def analyze_emotions_dataframe(df: pd.DataFrame,
     return df_out
 
 
-# ---------------------------------------------------------------------------
 # Testowanie modułu
-# ---------------------------------------------------------------------------
 
 if __name__ == "__main__":
     print("=== Test modułu sentiment_ai.py ===\n")

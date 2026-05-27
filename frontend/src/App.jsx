@@ -8,6 +8,7 @@ export default function App() {
   const [loading, setLoading] = useState(false)
   const [error, setError]     = useState(null)
   const [videoUrl, setVideoUrl] = useState('')
+  const [model, setModel]     = useState('vader')
 
   async function handleAnalyze(url) {
     setLoading(true)
@@ -19,11 +20,18 @@ export default function App() {
       const res = await fetch('/api/analyze', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ video_url: url, max_comments: 500 }),
+        body: JSON.stringify({ video_url: url, max_comments: 500, model }),
       })
       if (!res.ok) {
-        const err = await res.json()
-        throw new Error(err.detail || 'Nieznany błąd serwera')
+        // Serwer może zwrócić JSON z {detail: ...} lub plain-text (500)
+        let errorMsg = `Błąd serwera (HTTP ${res.status})`
+        try {
+          const err = await res.json()
+          errorMsg = err.detail || errorMsg
+        } catch {
+          // Odpowiedź nie jest JSONem (np. "Internal Server Error") — używamy statusu
+        }
+        throw new Error(errorMsg)
       }
       setData(await res.json())
     } catch (e) {
@@ -46,7 +54,7 @@ export default function App() {
       </header>
 
       <main className="app-main">
-        <SearchBar onAnalyze={handleAnalyze} loading={loading} />
+        <SearchBar onAnalyze={handleAnalyze} loading={loading} model={model} onModelChange={setModel} />
 
         {error && (
           <div className="error-box">

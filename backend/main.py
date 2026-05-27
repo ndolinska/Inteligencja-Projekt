@@ -25,9 +25,8 @@ from youtube_fetcher import fetch_comments
 from preprocessing import preprocess_dataframe
 from sentiment_ai import analyze_dataframe
 
-# ---------------------------------------------------------------------------
+
 # Aplikacja
-# ---------------------------------------------------------------------------
 
 app = FastAPI(
     title="YouTube Sentiment Dashboard API",
@@ -44,18 +43,25 @@ app.add_middleware(
 
 _cache: dict = {}
 
-# ---------------------------------------------------------------------------
 # Modele
-# ---------------------------------------------------------------------------
 
 class AnalyzeRequest(BaseModel):
     video_url:    str
     max_comments: int = 500
     order:        str = "time"   # "time" | "relevance"
+    model:        str = "vader"  # "vader" | "xlm-roberta"
 
-# ---------------------------------------------------------------------------
+# Singleton — model ładowany raz, trzymany w pamięci między requestami
+_transformer_model = None
+
+def get_transformer():
+    global _transformer_model
+    if _transformer_model is None:
+        from transformer_model import TransformerSentimentModel
+        _transformer_model = TransformerSentimentModel()
+    return _transformer_model
+
 # Helpers
-# ---------------------------------------------------------------------------
 
 STOP_WORDS = {
     # EN
@@ -135,9 +141,7 @@ def serialize_comments(df: pd.DataFrame, sentiment: str, n: int = 5) -> list:
         })
     return records
 
-# ---------------------------------------------------------------------------
 # Endpointy
-# ---------------------------------------------------------------------------
 
 @app.get("/api/health")
 async def health():
@@ -154,8 +158,8 @@ async def analyze(req: AnalyzeRequest):
     except ValueError as e:
         raise HTTPException(400, detail=str(e))
 
-    # Cache
-    cache_key = f"{video_id}|{req.max_comments}|{req.order}"
+    # Cache — klucz zawiera model, żeby wyniki VADER i RoBERTy były oddzielne
+    cache_key = f"{video_id}|{req.max_comments}|{req.order}|{req.model}"
     if cache_key in _cache:
         return {**_cache[cache_key], "from_cache": True}
 
@@ -173,8 +177,11 @@ async def analyze(req: AnalyzeRequest):
     if df_clean.empty:
         raise HTTPException(422, detail="Po filtrowaniu nie zostały żadne komentarze.")
 
-    # Sentyment
-    df = analyze_dataframe(df_clean, text_col='text_clean')
+    # Sentyment — wybór modelu przez użytkownika
+    if req.model == "xlm-roberta":
+        df = get_transformer().analyze_dataframe(df_clean, text_col='text_clean')
+    else:
+        df = analyze_dataframe(df_clean, text_col='text_clean')  # VADER (domyślny)
 
     # Agregacja
     total  = len(df)
@@ -190,6 +197,7 @@ async def analyze(req: AnalyzeRequest):
 
     result = {
         'video_id':          video_id,
+        'model_used':        req.model,
         'total_fetched':     len(df_raw),
         'total_analyzed':    total,
         'filtered_out':      len(df_raw) - total,

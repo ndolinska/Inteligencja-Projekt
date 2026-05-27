@@ -18,6 +18,7 @@ export default function StatsRow({ data }) {
     processing_time,
     from_cache,
     percentages,
+    model_used,
   } = data
 
   const positivePct = percentages?.['Pozytywny'] ?? 0
@@ -48,6 +49,11 @@ export default function StatsRow({ data }) {
         label="Czas analizy"
         value={`${processing_time.toFixed(1)} s`}
         sub={from_cache ? '⚡ z cache' : null}
+      />
+      <StatCard
+        label="Model"
+        value={model_used === 'xlm-roberta' ? 'XLM-RoBERTa' : 'VADER'}
+        sub={model_used === 'xlm-roberta' ? 'Transformer 🔬' : 'Słownikowy'}
       />
     </div>
   )

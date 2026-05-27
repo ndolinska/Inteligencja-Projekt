@@ -21,8 +21,6 @@ Dlaczego ten model (uzasadnienie do raportu):
     for Sentiment Analysis and Beyond." arXiv:2104.12250
     https://huggingface.co/cardiffnlp/twitter-xlm-roberta-base-sentiment
 
-Interfejs identyczny jak SentimentClassifier w ml_classifiers.py,
-co umożliwia bezpośrednie porównanie wyników.
 """
 
 import time
@@ -55,10 +53,7 @@ LABEL_MAP = {
 TWEET_EVAL_TO_MODEL = {0: 'negative', 1: 'neutral', 2: 'positive'}
 
 
-# ---------------------------------------------------------------------------
 # Klasa modelu
-# ---------------------------------------------------------------------------
-
 class TransformerSentimentModel:
     """
     Klasyfikator sentymentu oparty na XLM-RoBERTa.
@@ -105,15 +100,13 @@ class TransformerSentimentModel:
             truncation=True,        # komentarze dłuższe niż max_length są przycinane
             padding=True,
             top_k=None,             # zwracamy prawdopodobieństwa dla wszystkich klas
-            device=-1,              # CPU; zmień na 0 jeśli masz GPU z CUDA
+            device=-1,              # CPU;
         )
 
         elapsed = time.time() - t0
         print(f"  Model załadowany ({elapsed:.1f}s).")
 
-    # ------------------------------------------------------------------
     # Predykcja
-    # ------------------------------------------------------------------
 
     def predict_single(self, text: str) -> str:
         """
@@ -143,6 +136,8 @@ class TransformerSentimentModel:
         """
         Klasyfikuje cały DataFrame w batchach.
         Dodaje kolumny: 'sentiment_transformer' i 'sentiment_transformer_score'.
+        (Używaj analyze_dataframe() jeśli potrzebujesz kolumn 'sentiment'/'sentiment_score'
+        zgodnych z interfejsem VADER i resztą pipeline'u.)
         """
         self._load()
         df_out   = df.copy()
@@ -169,9 +164,19 @@ class TransformerSentimentModel:
         df_out['sentiment_transformer_score'] = scores
         return df_out
 
-    # ------------------------------------------------------------------
+    def analyze_dataframe(self, df: pd.DataFrame,
+                          text_col: str = 'text_clean') -> pd.DataFrame:
+        """
+        Ujednolicony interfejs zgodny z sentiment_ai.analyze_dataframe (VADER).
+        Zwraca DataFrame z kolumnami 'sentiment' i 'sentiment_score' —
+        dzięki temu main.py może używać VADER i XLM-RoBERTa wymiennie.
+        """
+        df_out = self.predict_dataframe(df, text_col=text_col)
+        df_out['sentiment']       = df_out['sentiment_transformer']
+        df_out['sentiment_score'] = df_out['sentiment_transformer_score']
+        return df_out
+
     # Ewaluacja — do porównania z ml_classifiers.py
-    # ------------------------------------------------------------------
 
     def evaluate(self, X_test: list, y_test: list) -> dict:
         """
@@ -227,10 +232,7 @@ class TransformerSentimentModel:
             'f1_weighted': round(f1_wei, 4),
         }
 
-
-# ---------------------------------------------------------------------------
 # Porównanie WSZYSTKICH modeli — główna funkcja badawcza
-# ---------------------------------------------------------------------------
 
 def full_model_comparison(n_test_samples: int = 1000,
                           save_csv: bool = True) -> pd.DataFrame:
@@ -329,10 +331,7 @@ def full_model_comparison(n_test_samples: int = 1000,
 
     return df_results
 
-
-# ---------------------------------------------------------------------------
 # Testowanie modułu
-# ---------------------------------------------------------------------------
 
 if __name__ == "__main__":
     print("=== Test modułu transformer_model.py ===\n")

@@ -43,10 +43,7 @@ warnings.filterwarnings('ignore')
 LABEL_MAP = {0: 'Negatywny', 1: 'Neutralny', 2: 'Pozytywny'}
 LABEL_MAP_REVERSE = {v: k for k, v in LABEL_MAP.items()}
 
-
-# ---------------------------------------------------------------------------
 # Ładowanie danych
-# ---------------------------------------------------------------------------
 
 def load_tweet_eval_dataset():
     """
@@ -88,9 +85,7 @@ def _print_label_distribution(labels, split_name: str):
         print(f"    {LABEL_MAP[label_id]:12s}: {count:6d} ({pct:.1f}%)")
 
 
-# ---------------------------------------------------------------------------
 # Klasa klasyfikatora
-# ---------------------------------------------------------------------------
 
 class SentimentClassifier:
     """
@@ -244,10 +239,7 @@ class SentimentClassifier:
                 "Model nie jest wytrenowany. Wywołaj najpierw .train()"
             )
 
-
-# ---------------------------------------------------------------------------
 # Porównanie modeli
-# ---------------------------------------------------------------------------
 
 def compare_models(save_csv: bool = True) -> pd.DataFrame:
     """
@@ -286,10 +278,7 @@ def compare_models(save_csv: bool = True) -> pd.DataFrame:
 
     return df_results
 
-
-# ---------------------------------------------------------------------------
 # Testowanie modułu
-# ---------------------------------------------------------------------------
 
 if __name__ == "__main__":
     print("=== Test modułu ml_classifiers.py ===\n")

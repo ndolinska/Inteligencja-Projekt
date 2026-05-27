@@ -13,7 +13,7 @@ API_KEY = os.getenv('key')
 youtube = build('youtube', 'v3', developerKey=API_KEY)
 
 
-def fetch_comments(video_id, max_results=500, order="time"):
+def fetch_comments(video_id, max_results=1000, order="time"):
     """
     Pobiera komentarze dla zadanego ID filmu na YouTube z paginacją.
 
@@ -30,7 +30,7 @@ def fetch_comments(video_id, max_results=500, order="time"):
     # API zwraca max 100 komentarzy na stronę
     page_size = min(100, max_results)
 
-    print(f"  Rozpoczynam pobieranie (cel: {max_results} komentarzy, sortowanie: {order})...")
+    print(f"Rozpoczynam pobieranie (cel: {max_results} komentarzy, sortowanie: {order})...")
 
     try:
         while len(comments_list) < max_results:
@@ -93,7 +93,7 @@ def fetch_comments(video_id, max_results=500, order="time"):
 
 # --- Testowanie skryptu ---
 if __name__ == "__main__":
-    TEST_VIDEO_ID = "dQw4w9WgXcQ"  # Rickroll — dużo komentarzy, dobry test
+    TEST_VIDEO_ID = "dQw4w9WgXcQ"
 
     print(f"Pobieram komentarze dla wideo: {TEST_VIDEO_ID}...")
     df_comments = fetch_comments(TEST_VIDEO_ID, max_results=300, order="time")

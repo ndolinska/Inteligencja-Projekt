@@ -5,9 +5,9 @@ Używany przez WSZYSTKIE modele (VADER, klasyfikatory ML, Transformery)
 jako pierwszy, ustandaryzowany etap analizy.
 
 Kolejność kroków:
-    1. Dekodowanie HTML entities  (&#39; → ')
+    1. Dekodowanie HTML entities  (&#39; => ')
     2. Usunięcie tagów HTML       (<br>, <b>, itp.)
-    3. Zamiana emoji na tekst     (🔥 → " ogień ")
+    3. Zamiana emoji na tekst     (🔥 => " ogień ")
     4. Usunięcie URLi
     5. Normalizacja białych znaków
     6. Wykrywanie języka
@@ -20,9 +20,7 @@ import pandas as pd
 from langdetect import detect, LangDetectException
 import emoji
 
-# ---------------------------------------------------------------------------
 # Stałe — wzorce regex
-# ---------------------------------------------------------------------------
 
 # Dopasowuje URL-e (http/https/ftp oraz skróty typu www.)
 URL_PATTERN = re.compile(
@@ -40,9 +38,7 @@ WHITESPACE_PATTERN = re.compile(r'\s+')
 LEFTOVER_PATTERN = re.compile(r'[^\w\s\'\"\!\?\.\,\:\;\-\(\)\#\@\&\+\=\/]')
 
 
-# ---------------------------------------------------------------------------
 # Funkcje pomocnicze
-# ---------------------------------------------------------------------------
 
 def decode_html(text: str) -> str:
     """Zamienia HTML entities na właściwe znaki (&#39; → ', &amp; → &)."""
@@ -117,9 +113,7 @@ def is_spam(text: str) -> bool:
     return False
 
 
-# ---------------------------------------------------------------------------
 # Główna funkcja — czyszczenie pojedynczego tekstu
-# ---------------------------------------------------------------------------
 
 def clean_text(text: str) -> str:
     """
@@ -135,10 +129,7 @@ def clean_text(text: str) -> str:
     text = normalize_whitespace(text)
     return text
 
-
-# ---------------------------------------------------------------------------
 # Funkcja do przetwarzania całego DataFrame
-# ---------------------------------------------------------------------------
 
 def preprocess_dataframe(df: pd.DataFrame,
                          filter_spam: bool = True,
@@ -190,9 +181,7 @@ def preprocess_dataframe(df: pd.DataFrame,
     return df_out
 
 
-# ---------------------------------------------------------------------------
 # Testowanie modułu
-# ---------------------------------------------------------------------------
 
 if __name__ == "__main__":
     # Przykładowe dane symulujące surowe komentarze z YouTube
