@@ -1,12 +1,9 @@
 """
-main.py — FastAPI backend dla YouTube Sentiment Dashboard
-
-Uruchomienie:
     uvicorn main:app --reload --port 8000
 
 Endpointy:
     GET  /api/health      — sprawdzenie działania serwera
-    POST /api/analyze     — pełna analiza komentarzy wideo
+    POST /api/analyze     — pełna analiza komentarzy wideo + transkrypcji
 """
 
 import re
@@ -24,6 +21,7 @@ sys.path.insert(0, os.path.dirname(__file__))
 from youtube_fetcher import fetch_comments
 from preprocessing import preprocess_dataframe
 from sentiment_ai import analyze_dataframe
+from transcript_fetcher import fetch_transcript
 
 
 # Aplikacja
@@ -129,15 +127,68 @@ def build_word_frequency(df: pd.DataFrame, top_n: int = 60) -> list:
     ]
 
 
+def analyze_transcript_text(text: str, model: str) -> dict:
+    """
+    Analizuje sentyment pełnego tekstu transkrypcji.
+    Dzieli tekst na fragmenty (~100 słów każde), ocenia każdy z osobna,
+    a następnie agreguje wyniki do jednego obiektu.
+    """
+    words = text.split()
+    chunk_size = 100
+    chunks = [
+        ' '.join(words[i:i + chunk_size])
+        for i in range(0, len(words), chunk_size)
+        if words[i:i + chunk_size]
+    ]
+
+    if not chunks:
+        return None
+
+    chunk_df = pd.DataFrame({'text_clean': chunks})
+
+    if model == "xlm-roberta":
+        result_df = get_transformer().analyze_dataframe(chunk_df, text_col='text_clean')
+    else:
+        result_df = analyze_dataframe(chunk_df, text_col='text_clean')
+
+    counts    = result_df['sentiment'].value_counts().to_dict()
+    total     = len(result_df)
+    dist      = {s: counts.get(s, 0) for s in ['Pozytywny', 'Neutralny', 'Negatywny']}
+    pct       = {s: round(v / total * 100, 1) for s, v in dist.items()}
+    avg_score = float(result_df['sentiment_score'].mean())
+    dominant  = max(dist, key=dist.get)
+
+    return {
+        'available':       True,
+        'dominant':        dominant,
+        'distribution':    dist,
+        'percentages':     pct,
+        'avg_score':       round(avg_score, 4),
+        'chunks_analyzed': total,
+        'word_count':      len(words),
+    }
+
+
+def make_display_text(row) -> str:
+    """Tekst do wyświetlenia w UI: bez encji HTML i tagów, ale z emoji."""
+    import html as _html
+    import re as _re
+    raw  = str(row.get('text', ''))
+    text = _html.unescape(raw)
+    text = _re.sub(r'<[^>]+>', '', text)
+    text = _re.sub(r'\s+', ' ', text).strip()
+    return text
+
+
 def serialize_comments(df: pd.DataFrame, sentiment: str, n: int = 5) -> list:
-    subset = df[df['sentiment'] == sentiment].nlargest(n, 'likes')
+    subset  = df[df['sentiment'] == sentiment].nlargest(n, 'likes')
     records = []
     for _, row in subset.iterrows():
         records.append({
-            'text':    str(row.get('text', '')),
-            'likes':   int(row.get('likes', 0)),
-            'score':   float(row.get('sentiment_score', 0)),
-            'date':    str(row['published_at'])[:10] if pd.notna(row.get('published_at')) else '',
+            'text':  make_display_text(row),
+            'likes': int(row.get('likes', 0)),
+            'score': float(row.get('sentiment_score', 0)),
+            'date':  str(row['published_at'])[:10] if pd.notna(row.get('published_at')) else '',
         })
     return records
 
@@ -158,12 +209,12 @@ async def analyze(req: AnalyzeRequest):
     except ValueError as e:
         raise HTTPException(400, detail=str(e))
 
-    # Cache — klucz zawiera model, żeby wyniki VADER i RoBERTy były oddzielne
+    # Cache
     cache_key = f"{video_id}|{req.max_comments}|{req.order}|{req.model}"
     if cache_key in _cache:
         return {**_cache[cache_key], "from_cache": True}
 
-    # Pobieranie
+    # Pobieranie komentarzy
     try:
         df_raw = fetch_comments(video_id, max_results=req.max_comments, order=req.order)
     except Exception as e:
@@ -195,21 +246,33 @@ async def analyze(req: AnalyzeRequest):
         for l, c in lang_counts.head(8).items()
     ]
 
+    # Transkrypcja
+    transcript_sentiment = {'available': False}
+    try:
+        transcript_text = fetch_transcript(video_id)
+        if transcript_text:
+            ts = analyze_transcript_text(transcript_text, req.model)
+            if ts:
+                transcript_sentiment = ts
+    except Exception:
+        pass
+
     result = {
-        'video_id':          video_id,
-        'model_used':        req.model,
-        'total_fetched':     len(df_raw),
-        'total_analyzed':    total,
-        'filtered_out':      len(df_raw) - total,
-        'distribution':      dist,
-        'percentages':       pct,
-        'time_series':       build_time_series(df),
-        'languages':         languages,
-        'top_positive':      serialize_comments(df, 'Pozytywny'),
-        'top_negative':      serialize_comments(df, 'Negatywny'),
-        'word_frequency':    build_word_frequency(df),
-        'processing_time':   round(time.time() - t0, 2),
-        'from_cache':        False,
+        'video_id':             video_id,
+        'model_used':           req.model,
+        'total_fetched':        len(df_raw),
+        'total_analyzed':       total,
+        'filtered_out':         len(df_raw) - total,
+        'distribution':         dist,
+        'percentages':          pct,
+        'time_series':          build_time_series(df),
+        'languages':            languages,
+        'top_positive':         serialize_comments(df, 'Pozytywny'),
+        'top_negative':         serialize_comments(df, 'Negatywny'),
+        'word_frequency':       build_word_frequency(df),
+        'transcript_sentiment': transcript_sentiment,
+        'processing_time':      round(time.time() - t0, 2),
+        'from_cache':           False,
     }
 
     _cache[cache_key] = result

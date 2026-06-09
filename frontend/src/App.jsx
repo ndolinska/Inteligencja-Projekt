@@ -23,13 +23,12 @@ export default function App() {
         body: JSON.stringify({ video_url: url, max_comments: 500, model }),
       })
       if (!res.ok) {
-        // Serwer może zwrócić JSON z {detail: ...} lub plain-text (500)
         let errorMsg = `Błąd serwera (HTTP ${res.status})`
         try {
           const err = await res.json()
           errorMsg = err.detail || errorMsg
         } catch {
-          // Odpowiedź nie jest JSONem (np. "Internal Server Error") — używamy statusu
+          // Odpowiedź nie jest JSONem — używamy statusu
         }
         throw new Error(errorMsg)
       }
@@ -54,7 +53,12 @@ export default function App() {
       </header>
 
       <main className="app-main">
-        <SearchBar onAnalyze={handleAnalyze} loading={loading} model={model} onModelChange={setModel} />
+        <SearchBar
+          onAnalyze={handleAnalyze}
+          loading={loading}
+          model={model}
+          onModelChange={setModel}
+        />
 
         {error && (
           <div className="error-box">

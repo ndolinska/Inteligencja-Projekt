@@ -4,6 +4,7 @@ import TimeSeries from './TimeSeries'
 import LanguageChart from './LanguageChart'
 import WordCloud from './WordCloud'
 import CommentsSection from './CommentsSection'
+import TranscriptPanel from './TranscriptPanel'
 import './Dashboard.css'
 
 export default function Dashboard({ data, videoUrl }) {
@@ -48,6 +49,10 @@ export default function Dashboard({ data, videoUrl }) {
         <CommentsSection
           topPositive={data.top_positive}
           topNegative={data.top_negative}
+        />
+        <TranscriptPanel
+          transcript={data.transcript_sentiment}
+          comments={{ distribution: data.distribution, percentages: data.percentages }}
         />
       </div>
     </div>
