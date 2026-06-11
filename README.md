@@ -6,7 +6,6 @@
 ## 🚀 Core Features
 - Real-time Sentiment Analysis: Automatically fetching data and classifying emotions into Positive, Negative, and Neutral categories as soon as a link is provided.
 - Interactive Time-Series Dashboard: A visual representation of mood changes over time, allowing the detection of "crisis moments" or sudden spikes in viewer approval.
-- Automated Topic Modeling: Utilizing algorithms to group comments into thematic clusters, such as "music," "acting," or "plot," to quickly identify what users are discussing most.
 - Multilingual Support: Integrating models capable of analyzing comments in various languages (e.g., Polish and English), which serves as a significant research element exceeding basic lecture material.
 
 ## 🧠 Research Aspect (AI Experiments)
